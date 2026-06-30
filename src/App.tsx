@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { Cat } from './components/Cat'
 import { CONFIG } from './config'
 import { getMilestoneState } from './utils/milestones'
-import { MOODS, getMood, loadMood, saveMood, todayKey } from './utils/mood'
+import {
+  MOODS,
+  fetchRemoteMood,
+  getMood,
+  loadMood,
+  postRemoteMood,
+  saveMood,
+  subscribeMood,
+  todayKey,
+} from './utils/mood'
 import { getTheme } from './utils/theme'
 import { formatStartDate, getTimeTogether } from './utils/time'
 import './App.css'
@@ -46,6 +56,27 @@ function App() {
     }
   }, [time, dayKey])
 
+  // Sincroniza o humor com o servidor: busca o atual e escuta mudanças ao vivo.
+  useEffect(() => {
+    let active = true
+    fetchRemoteMood()
+      .then((remote) => {
+        if (active) setMoodId(remote)
+      })
+      .catch(() => {
+        // servidor indisponível — mantém o valor local (offline)
+      })
+
+    const unsubscribe = subscribeMood((remote) => {
+      setMoodId(remote)
+      if (remote) saveMood(remote)
+    })
+    return () => {
+      active = false
+      unsubscribe()
+    }
+  }, [])
+
   useEffect(() => {
     return () => clearTimeout(happyTimeout.current)
   }, [])
@@ -66,6 +97,9 @@ function App() {
     setMoodId(id)
     saveMood(id)
     setMoodModalOpen(false)
+    postRemoteMood(id).catch(() => {
+      // sem conexão com o servidor — fica salvo localmente
+    })
   }
 
   const handlePet = () => {
@@ -199,66 +233,70 @@ function App() {
         )}
       </main>
 
-      {moodModalOpen && (
-        <div className="modal-overlay">
-          <button
-            type="button"
-            className="modal-backdrop"
-            aria-label="Fechar"
-            onClick={() => setMoodModalOpen(false)}
-          />
-          <div className="modal" role="dialog" aria-modal="true" aria-label="Escolher humor">
+      {moodModalOpen &&
+        createPortal(
+          <div className="modal-overlay">
             <button
               type="button"
-              className="modal-close"
+              className="modal-backdrop"
+              aria-label="Fechar"
               onClick={() => setMoodModalOpen(false)}
-              aria-label="Fechar"
-            >
-              ×
-            </button>
-            <p className="mood-title">Como a {CONFIG.herName} está hoje?</p>
-            <div className="mood-options">
-              {MOODS.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  className={`mood-option ${moodId === m.id ? 'active' : ''}`}
-                  onClick={() => handleSetMood(m.id)}
-                  title={m.label}
-                  aria-pressed={moodId === m.id}
-                >
-                  <span className="mood-option-emoji">{m.emoji}</span>
-                  <span className="mood-option-label">{m.label}</span>
-                </button>
-              ))}
+            />
+            <div className="modal" role="dialog" aria-modal="true" aria-label="Escolher humor">
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setMoodModalOpen(false)}
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+              <p className="mood-title">Como a {CONFIG.herName} está hoje?</p>
+              <div className="mood-options">
+                {MOODS.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`mood-option ${moodId === m.id ? 'active' : ''}`}
+                    onClick={() => handleSetMood(m.id)}
+                    title={m.label}
+                    aria-pressed={moodId === m.id}
+                  >
+                    <span className="mood-option-emoji">{m.emoji}</span>
+                    <span className="mood-option-label">{m.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
-      {themeModalOpen && (
-        <div className="modal-overlay">
-          <button
-            type="button"
-            className="modal-backdrop"
-            aria-label="Fechar"
-            onClick={() => setThemeModalOpen(false)}
-          />
-          <div className="modal theme-modal" role="dialog" aria-modal="true" aria-label="Saudação do momento">
+      {themeModalOpen &&
+        createPortal(
+          <div className="modal-overlay">
             <button
               type="button"
-              className="modal-close"
-              onClick={() => setThemeModalOpen(false)}
+              className="modal-backdrop"
               aria-label="Fechar"
-            >
-              ×
-            </button>
-            <span className="theme-modal-icon">{theme.icon}</span>
-            <p className="theme-modal-greeting">{theme.greeting}</p>
-            <p className="theme-modal-name">{CONFIG.herName} 💕</p>
-          </div>
-        </div>
-      )}
+              onClick={() => setThemeModalOpen(false)}
+            />
+            <div className="modal theme-modal" role="dialog" aria-modal="true" aria-label="Saudação do momento">
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setThemeModalOpen(false)}
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+              <span className="theme-modal-icon">{theme.icon}</span>
+              <p className="theme-modal-greeting">{theme.greeting}</p>
+              <p className="theme-modal-name">{CONFIG.herName} 💕</p>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
