@@ -78,14 +78,14 @@ export const ACCESSORIES: Accessory[] = [
   {
     id: 'sparkle',
     emoji: '✨',
-    label: 'Brilho especial',
+    label: 'Brilho ',
     daysRequired: 45,
     message: 'o.O',
   },
   {
     id: 'cape',
     emoji: '🦸',
-    label: 'Capa heroína',
+    label: 'Capa de herói',
     daysRequired: 60,
     message: 'UwU',
   },

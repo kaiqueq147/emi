@@ -6,6 +6,66 @@
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(160deg, var(--pink-light) 0%, #ffe4ec 40%, var(--white) 100%);
+  transition: background 1.5s ease;
+}
+
+/* Temas por horário */
+.app[data-theme='dawn'] {
+  background: linear-gradient(160deg, #ffd9b3 0%, #ffc4dd 45%, #fff0f5 100%);
+}
+
+.app[data-theme='day'] {
+  background: linear-gradient(160deg, #bfe9ff 0%, #ffe1ec 55%, #fff5f7 100%);
+}
+
+.app[data-theme='sunset'] {
+  background: linear-gradient(160deg, #ffae8f 0%, #ff8fab 45%, #b58cd6 100%);
+}
+
+.app[data-theme='night'] {
+  background: linear-gradient(160deg, #1f1b40 0%, #3b2d63 50%, #5a3f74 100%);
+}
+
+.sky-decor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.celestial {
+  position: absolute;
+  top: 6%;
+  right: 8%;
+  font-size: 3.5rem;
+  line-height: 1;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.5));
+  animation: celestial-float 6s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+.celestial:hover {
+  transform: scale(1.12);
+}
+
+.celestial:active {
+  transform: scale(0.95);
+}
+
+@keyframes celestial-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
 }
 
 .hearts-bg {
@@ -13,6 +73,10 @@
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+}
+
+.app[data-theme='night'] .floating-heart {
+  filter: hue-rotate(40deg) brightness(1.6);
 }
 
 .floating-heart {
@@ -53,6 +117,13 @@
 
 .header {
   margin-bottom: 0.5rem;
+}
+
+.greeting {
+  font-size: 0.95rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
 }
 
 .subtitle {
@@ -154,6 +225,242 @@
   color: var(--pink-strong);
   font-weight: 600;
   margin-top: 0.15rem;
+}
+
+.mood-bubble {
+  position: absolute;
+  top: -4px;
+  right: 6%;
+  z-index: 2;
+  background: var(--white);
+  border: 2px solid var(--pink-soft);
+  border-radius: 999px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px var(--shadow);
+  animation: mood-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mood-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border-right: 2px solid var(--pink-soft);
+  border-bottom: 2px solid var(--pink-soft);
+  transform: rotate(45deg);
+}
+
+.mood-bubble-emoji {
+  font-size: 1.5rem;
+  animation: mood-wiggle 3s ease-in-out infinite;
+}
+
+@keyframes mood-pop {
+  0% {
+    transform: scale(0) translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes mood-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.mood-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.1rem auto 0.4rem;
+  padding: 0.45rem 1rem;
+  background: var(--pink-light);
+  border: 1.5px solid var(--pink-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease;
+}
+
+.mood-trigger:hover {
+  transform: translateY(-2px);
+  background: #ffe4ec;
+}
+
+.mood-trigger-emoji {
+  font-size: 1.2rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: overlay-in 0.2s ease;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  cursor: pointer;
+  background: rgba(74, 48, 64, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  position: relative;
+  background: var(--white);
+  border-radius: 1.5rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 16px 48px rgba(255, 107, 157, 0.35);
+  text-align: center;
+  animation: modal-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modal-in {
+  from {
+    transform: scale(0.85) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--pink-light);
+}
+
+.mood-title {
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.theme-modal {
+  padding: 2rem 1.5rem 1.75rem;
+}
+
+.theme-modal-icon {
+  display: block;
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  animation: celestial-float 4s ease-in-out infinite;
+}
+
+.theme-modal-greeting {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.theme-modal-name {
+  font-size: 1rem;
+  color: var(--pink-strong);
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.mood-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.mood-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 62px;
+  padding: 0.45rem 0.25rem;
+  background: var(--pink-light);
+  border: 1.5px solid transparent;
+  border-radius: 0.9rem;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.mood-option:hover {
+  transform: translateY(-2px);
+  background: #ffe4ec;
+}
+
+.mood-option.active {
+  border-color: var(--pink-strong);
+  background: #ffe4ec;
+  box-shadow: 0 3px 10px var(--shadow);
+}
+
+.mood-option-emoji {
+  font-size: 1.4rem;
+}
+
+.mood-option-label {
+  font-size: 0.62rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.mood-option.active .mood-option-label {
+  color: var(--pink-deep);
 }
 
 .cat-svg {
